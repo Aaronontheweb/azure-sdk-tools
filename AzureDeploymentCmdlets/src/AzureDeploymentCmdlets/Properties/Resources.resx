@@ -615,9 +615,9 @@
     <value>Your account does not have access to the private key for certificate {0}</value>
   </data>
   <data name="PackageAzureServiceFinishedMessage" xml:space="preserve">
-    <value>Finished packaging application.</value>
+    <value>Finished packaging application. Package saved to {0}</value>
   </data>
   <data name="PackageAzureServiceStartMessage" xml:space="preserve">
-    <value>Packaging Azure application...</value>
+    <value>Packaging Azure application to file {0} ...</value>
   </data>
 </root>

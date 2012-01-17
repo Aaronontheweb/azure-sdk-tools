@@ -24,7 +24,7 @@ using AzureDeploymentCmdlets.WAPPSCmdlet;
 namespace AzureDeploymentCmdlets.Cmdlet
 {
     /// <summary>
-    /// Save a new deployment package (.cspack) for the current Windows Azure service. Overwrites the existing .cspack.
+    /// Save a new deployment package (.cspkg) for the current Windows Azure service. Overwrites the existing .cspkg.
     /// </summary>
     [Cmdlet(VerbsData.Save, "AzureServicePackage")]
     public class SaveAzureServicePackageCommand : ServiceManagementCmdletBase
@@ -46,9 +46,11 @@ namespace AzureDeploymentCmdlets.Cmdlet
             {
                 base.ProcessRecord();
 
-                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceStartMessage);
-                CreatePackage(GetServiceRootPath());
-                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceFinishedMessage);
+                var pathRoot = GetServiceRootPath();
+
+                SafeWriteObjectWithTimestamp(string.Format(Resources.PackageAzureServiceStartMessage, Path.Combine(pathRoot, Resources.CloudPackageFileName)));
+                CreatePackage(pathRoot);
+                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceFinishedMessage, Path.Combine(pathRoot, Resources.CloudPackageFileName));
 
             }
             catch(Exception ex)
@@ -58,7 +60,7 @@ namespace AzureDeploymentCmdlets.Cmdlet
         }
 
         /// <summary>
-        /// Create a new .cspack for the Azure path hosted at the specified root path
+        /// Create a new .cspkg for the Azure path hosted at the specified root path
         /// </summary>
         /// <param name="rootPath">Root path of the Azure service.</param>
         [PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
@@ -71,6 +73,8 @@ namespace AzureDeploymentCmdlets.Cmdlet
 
             string unused = null;
             _azureService.CreatePackage(DevEnv.Cloud, out unused, out unused);
+
+            Debug.Assert(File.Exists(Path.Combine(rootPath, Resources.CloudPackageFileName)));
         }
     }
 }

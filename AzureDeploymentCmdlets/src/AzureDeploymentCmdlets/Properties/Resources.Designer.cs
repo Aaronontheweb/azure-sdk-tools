@@ -846,7 +846,7 @@ namespace AzureDeploymentCmdlets.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finished packaging application..
+        ///   Looks up a localized string similar to Finished packaging application. Package saved to {0}.
         /// </summary>
         internal static string PackageAzureServiceFinishedMessage {
             get {
@@ -855,7 +855,7 @@ namespace AzureDeploymentCmdlets.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packaging Azure application....
+        ///   Looks up a localized string similar to Packaging Azure application to file {0} ....
         /// </summary>
         internal static string PackageAzureServiceStartMessage {
             get {
