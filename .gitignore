@@ -1,3 +1,4 @@
+
 _ReSharper*
 /AzureDeploymentCmdlets/src/AzureDeploymentCmdlets.Test/bin
 /AzureDeploymentCmdlets/src/AzureDeploymentCmdlets/bin
@@ -9,3 +10,4 @@ TestResults
 /AzureDeploymentCmdlets/src/util
 *.orig
 /Publish
+*.dot[Cc]over
