@@ -147,6 +147,7 @@
     <Compile Include="Tests\Cmdlet\NewAzureServiceTests.cs" />
     <Compile Include="Tests\Cmdlet\PublishAzureServiceCommandTests.cs" />
     <Compile Include="Tests\Cmdlet\RemoveAzureServiceTests.cs" />
+    <Compile Include="Tests\Cmdlet\SaveAzureServicePackageTests.cs" />
     <Compile Include="Tests\Cmdlet\SetAzureDeploymentSlotTests.cs" />
     <Compile Include="Tests\Cmdlet\SetAzureDeploymentStorageTests.cs" />
     <Compile Include="Tests\Cmdlet\SetAzureSubscriptionTests.cs" />

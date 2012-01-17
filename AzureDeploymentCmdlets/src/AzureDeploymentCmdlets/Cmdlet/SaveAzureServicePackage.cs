@@ -28,7 +28,6 @@ namespace AzureDeploymentCmdlets.Cmdlet
     [Cmdlet(VerbsData.Save, "AzureServicePackage")]
     public class SaveAzureServicePackageCommand : ServiceManagementCmdletBase
     {
-        private DeploymentSettings _deploymentSettings;
         private AzureService _azureService;
 
         /// <summary>
