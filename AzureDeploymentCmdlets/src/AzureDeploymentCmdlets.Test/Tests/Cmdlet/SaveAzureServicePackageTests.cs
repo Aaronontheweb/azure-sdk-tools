@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureDeploymentCmdlets.Cmdlet;
 using AzureDeploymentCmdlets.Node.Cmdlet;
+using AzureDeploymentCmdlets.Properties;
+using AzureDeploymentCmdlets.Test.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
@@ -39,9 +41,6 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
             //Create a temp directory for monitoring and cleaning up the output of our test
             using(FileSystemHelper files = new FileSystemHelper(this){EnableMonitoring = true})
             {
-                // Import our default publish settings
-                files.CreateAzureSdkDirectoryAndImportPublishSettings();
-
                 //Create a new service that we're going to pack locally
                 string serviceName = "TEST_SERVICE_NAME";
                 NewAzureServiceCommand newService = new NewAzureServiceCommand();
@@ -52,11 +51,14 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                 string roleName = "TEST_WEB_ROLE";
                 int instanceCount = 2;
                 AddAzureNodeWebRoleCommand addAzureNodeWebRole = new AddAzureNodeWebRoleCommand();
-                addAzureNodeWebRole.AddAzureNodeWebRoleProcess(roleName, instanceCount, files.RootPath);
+                addAzureNodeWebRole.AddAzureNodeWebRoleProcess(roleName, instanceCount, servicePath);
 
                 //Run our packaging command
                 SaveAzureServicePackageCommand saveServicePackage = new SaveAzureServicePackageCommand();
                 saveServicePackage.CreatePackage(servicePath);
+
+                //Assert that the service structure is as expected
+                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, roleName), Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
 
                 // Verify the generated files
                 files.AssertFiles(new Dictionary<string, Action<string>>()
@@ -70,24 +72,12 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                         p => File.ReadAllText(p).Contains(serviceName)
                     },
                     {
-                        serviceName + @"\ServiceDefinition.csdef",
-                        p => File.ReadAllText(p).Contains(roleName)
-                    },
-                    {
                         serviceName + @"\ServiceConfiguration.Cloud.cscfg",
                         p => File.ReadAllText(p).Contains(serviceName)
                     },
                     {
-                        serviceName + @"\ServiceConfiguration.Cloud.cscfg",
-                        p => File.ReadAllText(p).Contains(roleName)
-                    },
-                    {
                         serviceName + @"\ServiceConfiguration.Local.cscfg",
                         p => File.ReadAllText(p).Contains(serviceName)
-                    },
-                    {
-                        serviceName + @"\ServiceConfiguration.Local.cscfg",
-                        p => File.ReadAllText(p).Contains(roleName)
                     },
                     {
                         serviceName + @"\cloud_package.cspkg",
@@ -95,7 +85,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                         {
                             using (Package package = Package.Open(p))
                             {
-                                Assert.AreEqual(5, package.GetParts().Count());
+                                Assert.AreEqual(6, package.GetParts().Count());
                             }
                         }
                     }
