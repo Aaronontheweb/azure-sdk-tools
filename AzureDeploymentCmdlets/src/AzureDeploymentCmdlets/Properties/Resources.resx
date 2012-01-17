@@ -614,5 +614,10 @@
   <data name="CertificatePrivateKeyAccessError" xml:space="preserve">
     <value>Your account does not have access to the private key for certificate {0}</value>
   </data>
-
+  <data name="PackageAzureServiceFinishedMessage" xml:space="preserve">
+    <value>Finished packaging application.</value>
+  </data>
+  <data name="PackageAzureServiceStartMessage" xml:space="preserve">
+    <value>Packaging Azure application...</value>
+  </data>
 </root>

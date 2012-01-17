@@ -18,6 +18,7 @@ using System.IO;
 using System.Management.Automation;
 using System.Security.Permissions;
 using AzureDeploymentCmdlets.Model;
+using AzureDeploymentCmdlets.Properties;
 using AzureDeploymentCmdlets.WAPPSCmdlet;
 
 namespace AzureDeploymentCmdlets.Cmdlet
@@ -45,13 +46,9 @@ namespace AzureDeploymentCmdlets.Cmdlet
             {
                 base.ProcessRecord();
 
-                //Todo: Replace with reference to resource file
-                SafeWriteObjectWithTimestamp("Packaging application...");
-
+                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceStartMessage);
                 CreatePackage(GetServiceRootPath());
-
-                //Todo: Replace with reference to resource file
-                SafeWriteObjectWithTimestamp("Packaging complete...");
+                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceFinishedMessage);
 
             }
             catch(Exception ex)
@@ -74,7 +71,6 @@ namespace AzureDeploymentCmdlets.Cmdlet
 
             string unused = null;
             _azureService.CreatePackage(DevEnv.Cloud, out unused, out unused);
-
         }
     }
 }

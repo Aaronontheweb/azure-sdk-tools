@@ -846,6 +846,24 @@ namespace AzureDeploymentCmdlets.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Finished packaging application..
+        /// </summary>
+        internal static string PackageAzureServiceFinishedMessage {
+            get {
+                return ResourceManager.GetString("PackageAzureServiceFinishedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packaging Azure application....
+        /// </summary>
+        internal static string PackageAzureServiceStartMessage {
+            get {
+                return ResourceManager.GetString("PackageAzureServiceStartMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Path {0} doesn&apos;t exist..
         /// </summary>
         internal static string PathDoesNotExist {
