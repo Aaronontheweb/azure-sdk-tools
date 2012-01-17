@@ -30,6 +30,7 @@ Node.js Developer Center</a>.</p>
 <p>Publish your service to the cloud and configure publish settings</p>
 <ul>
     <li><strong>Publish-AzureService</strong> - Publish the current service to the cloud</li>
+    <li><strong>Save-AzureServicePackage</strong> - Save your current service to a .cspkg deployment package</li>
     <li><strong>Set-AzureDeploymentStorage</strong> - Sets the storage account to be used when
     publishing the service to the cloud</li>
     <li><strong>Set-AzureDeploymentSubscription</strong> - Sets the subscription name to be
