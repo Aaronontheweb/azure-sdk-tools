@@ -144,7 +144,7 @@
     <Compile Include="Cmdlet\EnableAzureRemoteDesktop.cs" />
     <Compile Include="Cmdlet\GetAzurePublishSettings.cs" />
     <Compile Include="Cmdlet\GetAzureStorageAccounts.cs" />
-    <Compile Include="Cmdlet\PackageAzureService.cs" />
+    <Compile Include="Cmdlet\SaveAzureServicePackage.cs" />
     <Compile Include="Model\AzureServiceManagementException.cs" />
     <Compile Include="Model\GetDeploymentStatus.cs" />
     <Compile Include="Model\RemoveAzureDeployment.cs" />

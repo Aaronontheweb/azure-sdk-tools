@@ -13,15 +13,11 @@
 // ----------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Management.Automation;
 using System.Security.Permissions;
-using System.Text;
 using AzureDeploymentCmdlets.Model;
-using AzureDeploymentCmdlets.Properties;
 using AzureDeploymentCmdlets.WAPPSCmdlet;
 
 namespace AzureDeploymentCmdlets.Cmdlet
