@@ -846,24 +846,6 @@ namespace AzureDeploymentCmdlets.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finished packaging application. Package saved to {0}.
-        /// </summary>
-        internal static string PackageAzureServiceFinishedMessage {
-            get {
-                return ResourceManager.GetString("PackageAzureServiceFinishedMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Packaging Azure application to file {0} ....
-        /// </summary>
-        internal static string PackageAzureServiceStartMessage {
-            get {
-                return ResourceManager.GetString("PackageAzureServiceStartMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Path {0} doesn&apos;t exist..
         /// </summary>
         internal static string PathDoesNotExist {
@@ -1229,6 +1211,24 @@ namespace AzureDeploymentCmdlets.Properties {
         internal static string RunInEmulatorArguments {
             get {
                 return ResourceManager.GetString("RunInEmulatorArguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Finished packaging application. Package saved to {0}.
+        /// </summary>
+        internal static string SaveAzureServicePackageFinishedMessage {
+            get {
+                return ResourceManager.GetString("SaveAzureServicePackageFinishedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packaging Azure application to file {0} ....
+        /// </summary>
+        internal static string SaveAzureServicePackageStartMessage {
+            get {
+                return ResourceManager.GetString("SaveAzureServicePackageStartMessage", resourceCulture);
             }
         }
         

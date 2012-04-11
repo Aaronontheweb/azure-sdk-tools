@@ -48,9 +48,11 @@ namespace AzureDeploymentCmdlets.Cmdlet
 
                 var pathRoot = GetServiceRootPath();
 
-                SafeWriteObjectWithTimestamp(string.Format(Resources.PackageAzureServiceStartMessage, Path.Combine(pathRoot, Resources.CloudPackageFileName)));
+                SafeWriteObjectWithTimestamp(string.Format(Resources.SaveAzureServicePackageStartMessage, 
+                    Path.Combine(pathRoot, Resources.CloudPackageFileName)));
                 CreatePackage(pathRoot);
-                SafeWriteObjectWithTimestamp(Resources.PackageAzureServiceFinishedMessage, Path.Combine(pathRoot, Resources.CloudPackageFileName));
+                SafeWriteObjectWithTimestamp(Resources.SaveAzureServicePackageFinishedMessage, 
+                    Path.Combine(pathRoot, Resources.CloudPackageFileName));
 
             }
             catch(Exception ex)
@@ -79,7 +81,8 @@ namespace AzureDeploymentCmdlets.Cmdlet
             if(standardOutput != null) SafeWriteObject(standardOutput);
             if(standardErr != null) SafeWriteObject(standardErr);
 
-            Debug.Assert(File.Exists(Path.Combine(rootPath, Resources.CloudPackageFileName)));
+            Debug.Assert(File.Exists(
+                Path.Combine(rootPath, Resources.CloudPackageFileName)));
         }
     }
 }
