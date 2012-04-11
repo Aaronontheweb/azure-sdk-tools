@@ -71,8 +71,13 @@ namespace AzureDeploymentCmdlets.Cmdlet
 
             _azureService = new AzureService(rootPath, null);
 
-            string unused = null;
-            _azureService.CreatePackage(DevEnv.Cloud, out unused, out unused);
+            string standardOutput = null;
+            string standardErr = null;
+            _azureService.CreatePackage(DevEnv.Cloud, out standardOutput, out standardErr);
+
+            //Log standard out or standard error to console
+            if(standardOutput != null) SafeWriteObject(standardOutput);
+            if(standardErr != null) SafeWriteObject(standardErr);
 
             Debug.Assert(File.Exists(Path.Combine(rootPath, Resources.CloudPackageFileName)));
         }

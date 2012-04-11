@@ -32,6 +32,9 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
     [TestClass]
     public class SaveAzureServicePackageTests : TestBase
     {
+        private const int expectedPackagePartsForHostedServiceWithOneRole = 6;
+        private const int expectedPackagePartsForHostedServiceWithTwoRoles = 7;
+
         /// <summary>
         /// Test a basic packaging scenario for an Azure Service Package with a single web role.
         /// </summary>
@@ -58,7 +61,8 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                 saveServicePackage.CreatePackage(servicePath);
 
                 //Assert that the service structure is as expected
-                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, roleName), Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
+                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, roleName), 
+                    Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
 
                 // Verify the generated files
                 files.AssertFiles(new Dictionary<string, Action<string>>()
@@ -85,7 +89,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                         {
                             using (Package package = Package.Open(p))
                             {
-                                Assert.AreEqual(6, package.GetParts().Count());
+                                Assert.AreEqual(expectedPackagePartsForHostedServiceWithOneRole, package.GetParts().Count());
                             }
                         }
                     }
@@ -95,7 +99,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
         }
 
         /// <summary>
-        /// Test a basic packaging scenario for an Azure Service Package with a single web role.
+        /// Test a basic packaging scenario for an Azure Service Package with a single worker role.
         /// </summary>
         [TestMethod]
         public void SavePackageWithOneNodeWorkerRoleTest()
@@ -147,7 +151,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                         {
                             using (Package package = Package.Open(p))
                             {
-                                Assert.AreEqual(6, package.GetParts().Count());
+                                Assert.AreEqual(expectedPackagePartsForHostedServiceWithOneRole, package.GetParts().Count());
                             }
                         }
                     }
@@ -157,7 +161,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
         }
 
         /// <summary>
-        /// Test a basic packaging scenario for an Azure Service Package with a single web role.
+        /// Test a basic packaging scenario for an Azure Service Package with a web AND worker role.
         /// </summary>
         [TestMethod]
         public void SavePackageWithMultipleRolesTest()
@@ -188,8 +192,10 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                 saveServicePackage.CreatePackage(servicePath);
 
                 //Assert that the service structure is as expected
-                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, workerRoleName), Path.Combine(Resources.NodeScaffolding, Resources.WorkerRole));
-                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, webRoleName), Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
+                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, workerRoleName), 
+                    Path.Combine(Resources.NodeScaffolding, Resources.WorkerRole));
+                AzureAssert.ScaffoldingExists(Path.Combine(files.RootPath, serviceName, webRoleName), 
+                    Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
 
                 // Verify the generated files
                 files.AssertFiles(new Dictionary<string, Action<string>>()
@@ -216,7 +222,7 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                         {
                             using (Package package = Package.Open(p))
                             {
-                                Assert.AreEqual(7, package.GetParts().Count());
+                                Assert.AreEqual(expectedPackagePartsForHostedServiceWithTwoRoles, package.GetParts().Count());
                             }
                         }
                     }
