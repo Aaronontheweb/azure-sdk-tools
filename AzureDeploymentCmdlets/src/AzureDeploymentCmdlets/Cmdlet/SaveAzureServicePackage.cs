@@ -78,8 +78,8 @@ namespace AzureDeploymentCmdlets.Cmdlet
             _azureService.CreatePackage(DevEnv.Cloud, out standardOutput, out standardErr);
 
             //Log standard out or standard error to console
-            if(standardOutput != null) SafeWriteObject(standardOutput);
-            if(standardErr != null) SafeWriteObject(standardErr);
+            if(standardOutput != null) SafeWriteObjectWithTimestamp(standardOutput);
+            if(standardErr != null) SafeWriteObjectWithTimestamp(standardErr);
 
             Debug.Assert(File.Exists(
                 Path.Combine(rootPath, Resources.CloudPackageFileName)));
