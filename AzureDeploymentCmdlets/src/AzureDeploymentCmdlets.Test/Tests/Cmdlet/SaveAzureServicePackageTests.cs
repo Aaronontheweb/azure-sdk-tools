@@ -230,5 +230,77 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
 
             }
         }
+
+        /// <summary>
+        /// Ensure that any iisnode logs are removed prior to packaging the
+        /// service.
+        ///</summary>
+        [TestMethod]
+        public void SavePackageRemovesNodeLogs()
+        {
+            // Create a temp directory that we'll use to "publish" our service
+            using (FileSystemHelper files = new FileSystemHelper(this) { EnableMonitoring = true })
+            {
+                // Create a new service that we're going to publish
+                string serviceName = "TEST_SERVICE_NAME";
+                NewAzureServiceCommand newService = new NewAzureServiceCommand();
+                newService.NewAzureServiceProcess(files.RootPath, serviceName);
+                string servicePath = files.CreateDirectory(serviceName);
+
+                // Add a web role
+                AddAzureNodeWebRoleCommand newWebRole = new AddAzureNodeWebRoleCommand();
+                string webRoleName = "NODE_WEB_ROLE";
+                newWebRole.AddAzureNodeWebRoleProcess(webRoleName, 2, servicePath);
+                string webRolePath = Path.Combine(servicePath, webRoleName);
+
+                // Add a worker role
+                AddAzureNodeWorkerRoleCommand newWorkerRole = new AddAzureNodeWorkerRoleCommand();
+                string workerRoleName = "NODE_WORKER_ROLE";
+                newWorkerRole.AddAzureNodeWorkerRoleProcess(workerRoleName, 2, servicePath);
+                string workerRolePath = Path.Combine(servicePath, workerRoleName);
+
+                // Add second web and worker roles that we won't add log
+                // entries to
+                new AddAzureNodeWebRoleCommand()
+                    .AddAzureNodeWebRoleProcess("SECOND_WEB_ROLE", 2, servicePath);
+                new AddAzureNodeWorkerRoleCommand()
+                    .AddAzureNodeWorkerRoleProcess("SECOND_WORKER_ROLE", 2, servicePath);
+
+                // Add fake logs directories for server.js
+                string logName = "server.js.logs";
+                string logPath = Path.Combine(webRolePath, logName);
+                Directory.CreateDirectory(logPath);
+                File.WriteAllText(Path.Combine(logPath, "0.txt"), "secret web role debug details were logged here");
+                logPath = Path.Combine(Path.Combine(workerRolePath, "NestedDirectory"), logName);
+                Directory.CreateDirectory(logPath);
+                File.WriteAllText(Path.Combine(logPath, "0.txt"), "secret worker role debug details were logged here");
+
+                //Run our packaging command
+                SaveAzureServicePackageCommand saveServicePackage = new SaveAzureServicePackageCommand();
+                saveServicePackage.CreatePackage(servicePath);
+
+                // Rip open the package and make sure we can't find the log
+                string packagePath = Path.Combine(servicePath, "cloud_package.cspkg");
+                using (Package package = Package.Open(packagePath))
+                {
+                    // Make sure the web role and worker role packages don't
+                    // have any files with server.js.logs in the name
+                    Action<string> validateRole = roleName =>
+                    {
+                        PackagePart rolePart = package.GetParts().Where(p => p.Uri.ToString().Contains(roleName)).First();
+                        using (Package rolePackage = Package.Open(rolePart.GetStream()))
+                        {
+                            Assert.IsFalse(
+                                rolePackage.GetParts().Any(p => p.Uri.ToString().Contains(logName)),
+                                "Found {0} part in {1} package!",
+                                logName,
+                                roleName);
+                        }
+                    };
+                    validateRole(webRoleName);
+                    validateRole(workerRoleName);
+                }
+            }
+        }
     }
 }
