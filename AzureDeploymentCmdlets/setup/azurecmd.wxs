@@ -4,7 +4,7 @@
   <?define productName="Windows Azure PowerShell for Node.js - November 2011" ?>
   <?define sourcedir="$(var.SolutionDir)..\src\AzureDeploymentCmdlets\bin\$(var.Configuration)\" ?>
 
-  <?define version="0.5.1" ?> 
+  <?define version="0.5.3" ?> 
   <?define azureSdkVersion="1.6" ?>
   <?define versionedFolder="Nov2011" ?>
   <?define versionedStartMenuFolder="Windows Azure SDK for Node.js - November 2011" ?>  
@@ -87,7 +87,7 @@
                   Name="Windows Azure PowerShell for Node.js"
                   Description="Windows PowerShell commandlets for deploying Node.js applications to Windows Azure"
                   Target="[SystemFolder]\WindowsPowerShell\v1.0\powershell.exe"
-                  Arguments="-NoExit -Command &quot;cd c:\; Import-Module '[#filC06AD0EE9E0F411A6B55820A573E8F13]'&quot;"
+                  Arguments="-NoExit -Command &quot;cd 'C:\'; Get-ChildItem '[PowerShellFolder]*cmdlets.dll' | ForEach-Object {Import-Module $_}&quot;"
                   />
         <File Id="GettingStartedLnk" KeyPath="no" Source="media\GettingStarted.url" />
         <RemoveFolder Id="AzureSdkNodejsFolder" On="uninstall"/>

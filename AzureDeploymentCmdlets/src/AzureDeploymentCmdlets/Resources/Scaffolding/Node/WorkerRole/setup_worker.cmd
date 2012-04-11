@@ -1,7 +1,7 @@
 @echo off
 
 echo Granting permissions for Network Service to the deployment directory...
-icacls . /grant "Network Service":(OI)(CI)W
+icacls . /grant "Users":(OI)(CI)F
 if %ERRORLEVEL% neq 0 goto error
 echo OK
 

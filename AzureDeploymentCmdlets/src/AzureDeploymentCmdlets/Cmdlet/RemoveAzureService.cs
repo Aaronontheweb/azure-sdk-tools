@@ -24,7 +24,7 @@ namespace AzureDeploymentCmdlets.Cmdlet
     /// <summary>
     /// Deletes the specified hosted service from Windows Azure.
     /// </summary>
-    [Cmdlet(VerbsCommon.Remove, "AzureService")]
+    [Cmdlet(VerbsCommon.Remove, "AzureService", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.High)]
     public class RemoveAzureServiceCommand : ServiceManagementCmdletBase
     {
         [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "name of subscription which has this service")]
@@ -41,17 +41,22 @@ namespace AzureDeploymentCmdlets.Cmdlet
             this.Channel = channel;
         }
 
-        public void RemoveAzureServiceProcess(string rootName, string inSubscription)
+        public bool RemoveAzureServiceProcess(string rootName, string inSubscription)
         {
             string serviceName;
             ServiceSettings settings = base.GetDefaultSettings(rootName, null, null, null, null, inSubscription, out serviceName);
             subscriptionId = new GlobalComponents(GlobalPathInfo.GlobalSettingsDirectory).GetSubscriptionId(settings.Subscription);
+            if (!ShouldProcess("", string.Format(Resources.RemoveServiceWarning, serviceName), Resources.ShouldProcessCaption))
+            {
+                return false;
+            }
             SafeWriteObjectWithTimestamp(Resources.RemoveServiceStartMessage, serviceName);
             SafeWriteObjectWithTimestamp(Resources.RemoveDeploymentMessage);
             StopAndRemove(rootName, serviceName, settings.Subscription, ArgumentConstants.Slots[Slot.Production]);
             StopAndRemove(rootName, serviceName, settings.Subscription, ArgumentConstants.Slots[Slot.Staging]);
             SafeWriteObjectWithTimestamp(Resources.RemoveServiceMessage);
             RemoveService(serviceName);
+            return true;
         }
 
         private void StopAndRemove(string rootName, string serviceName, string subscription, string slot)
@@ -88,8 +93,10 @@ namespace AzureDeploymentCmdlets.Cmdlet
             {
                 base.ProcessRecord();
 
-                RemoveAzureServiceProcess(base.GetServiceRootPath(), Subscription);
-                SafeWriteObjectWithTimestamp(Resources.CompleteMessage);    
+                if (RemoveAzureServiceProcess(base.GetServiceRootPath(), Subscription))
+                {
+                    SafeWriteObjectWithTimestamp(Resources.CompleteMessage);
+                }
             }
             catch (Exception ex)
             {

@@ -12,10 +12,10 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using System;
 using AzureDeploymentCmdlets.Model;
 using AzureDeploymentCmdlets.Test.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 
 namespace AzureDeploymentCmdlets.Test.Tests.Model
 {
@@ -27,6 +27,49 @@ namespace AzureDeploymentCmdlets.Test.Tests.Model
         {
             ServiceSettings settings = new ServiceSettings();
             AzureAssert.AreEqualServiceSettings(string.Empty, string.Empty, string.Empty, string.Empty, settings);
+        }
+
+        /// <summary>
+        /// Verify that using an invalid storage account name throws an
+        /// exception.
+        /// </summary>
+        [TestMethod]
+        public void InvalidStorageAccountName()
+        {
+            // Create a temp directory that we'll use to "publish" our service
+            using (FileSystemHelper files = new FileSystemHelper(this) { EnableMonitoring = true })
+            {
+                // Import our default publish settings
+                files.CreateAzureSdkDirectoryAndImportPublishSettings();
+
+                string serviceName = null;
+                Testing.AssertThrows<ArgumentException>(() =>
+                    ServiceSettings.LoadDefault(null, null, null, null, "I HAVE INVALID CHARACTERS !@#$%", null, null, out serviceName));
+                Testing.AssertThrows<ArgumentException>(() =>
+                    ServiceSettings.LoadDefault(null, null, null, null, "ihavevalidcharsbutimjustwaytooooooooooooooooooooooooooooooooooooooooolong", null, null, out serviceName));
+            }
+        }
+
+        /// <summary>
+        /// Verify that a service name with invalid characters is correctly
+        /// sanitized to a storage account name.
+        /// </summary>
+        [TestMethod]
+        public void SanitizeServiceNameForStorageAccountName()
+        {
+            // Create a temp directory that we'll use to "publish" our service
+            using (FileSystemHelper files = new FileSystemHelper(this) { EnableMonitoring = true })
+            {
+                // Import our default publish settings
+                files.CreateAzureSdkDirectoryAndImportPublishSettings();
+
+                string serviceName = null;
+                ServiceSettings settings = ServiceSettings.LoadDefault(null, null, null, null, null, "My-Custom-Service!", null, out serviceName);
+                Assert.AreEqual("myx2dcustomx2dservicex21", settings.StorageAccountName);
+
+                settings = ServiceSettings.LoadDefault(null, null, null, null, null, "MyCustomServiceIsWayTooooooooooooooooooooooooLong", null, out serviceName);
+                Assert.AreEqual("mycustomserviceiswaytooo", settings.StorageAccountName);
+            }
         }
     }
 }

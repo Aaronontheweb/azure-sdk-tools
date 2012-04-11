@@ -13,15 +13,30 @@
 // ----------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
 using AzureDeploymentCmdlets.Properties;
 using AzureDeploymentCmdlets.Utilities;
-using System.Web.Script.Serialization;
 
 namespace AzureDeploymentCmdlets.Model
 {
     public class ServiceSettings
     {
+        /// <summary>
+        /// Minimum length of a valid storage account name.
+        /// http://msdn.microsoft.com/en-us/library/windowsazure/hh264518.aspx
+        /// </summary>
+        private const int MinimumStorageAccountNameLength = 3;
+
+        /// <summary>
+        /// Maximum length of a valid storage account name.
+        /// http://msdn.microsoft.com/en-us/library/windowsazure/hh264518.aspx
+        /// </summary>
+        private const int MaximumStorageAccountNameLength = 24;
+
         // Flag indicating whether the ServiceSettings have already been loaded
         // and should begin validating any properties (which is used to allow
         // the deserializer to set empty values without tripping validation)
@@ -166,31 +181,83 @@ namespace AzureDeploymentCmdlets.Model
 
         private static string GetDefaultStorageName(string localStorageName, string globalStorageAccountName, string storageAccountName, string serviceName)
         {
+            Debug.Assert(serviceName != null, "serviceName cannot be null.");
+
+            string name = serviceName;
+
             // If user supplied value as parameter then return it
-            //
             if (!string.IsNullOrEmpty(storageAccountName))
             {
-                return storageAccountName;
+                name = storageAccountName;
             }
             // User already has value in local service settings
-            //
             else if (!string.IsNullOrEmpty(localStorageName))
             {
-                return localStorageName;
+                name = localStorageName;
             }
             // User already has value in global service settings
-            //
             else if (!string.IsNullOrEmpty(globalStorageAccountName))
             {
-                return globalStorageAccountName;
+                name = globalStorageAccountName;
             }
             // If none of previous succeed, use service name as storage account name
-            //
-            else if (!String.IsNullOrEmpty(serviceName))
+            else if (!string.IsNullOrEmpty(serviceName))
             {
-                serviceName = serviceName.Replace("-", "x2d");
+                name = SanitizeStorageAccountName(serviceName);
             }
-            return serviceName;
+
+            name = name.ToLower();
+            ValidateStorageAccountName(name);
+
+            return name;
+        }
+
+        /// <summary>
+        /// Sanitize a name for use as a storage account name.
+        /// </summary>
+        /// <param name="name">The potential storage account name.</param>
+        /// <returns>The sanitized storage account name.</returns>
+        private static string SanitizeStorageAccountName(string name)
+        {
+            // Replace any non-letters or non-digits with their hex equivalent
+            StringBuilder builder = new StringBuilder(name.Length);
+            foreach (char ch in name)
+            {
+                if (char.IsLetter(ch) || char.IsDigit(ch))
+                {
+                    builder.Append(ch);
+                }
+                else
+                {
+                    builder.AppendFormat("x{0:X}", (ushort)ch);
+                }
+            }
+
+            // Trim the sanitized name to at most 24 characters.
+            name = builder.ToString(
+                0,
+                Math.Min(builder.Length, MaximumStorageAccountNameLength));
+
+            return name;
+        }
+
+        /// <summary>
+        /// Validate that the storage account name contains only lower case
+        /// letters or numbers and is between 3 and 24 characters in length
+        /// (per http://msdn.microsoft.com/en-us/library/windowsazure/hh264518.aspx)
+        /// unless the string is empty (which can happen if it wasn't provided
+        /// or generated).
+        /// </summary>
+        /// <param name="name">The storage account name.</param>
+        private static void ValidateStorageAccountName(string name)
+        {
+            if (!string.IsNullOrEmpty(name) &&
+                (!name.All(c => char.IsLower(c) || char.IsDigit(c)) ||
+                  name.Length < MinimumStorageAccountNameLength ||
+                  name.Length > MaximumStorageAccountNameLength))
+            {
+                throw new ArgumentException(string.Format(Properties.Resources.ServiceSettings_ValidateStorageAccountName_InvalidName, name));
+            }
         }
 
         private static string GetDefaultSubscription(string localSubscription, string globalSubscription, string subscription)

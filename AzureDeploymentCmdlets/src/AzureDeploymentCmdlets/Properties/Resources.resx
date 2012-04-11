@@ -403,7 +403,7 @@
     <value>Role type {0} doesn't exist</value>
   </data>
   <data name="RunInEmulatorArguments" xml:space="preserve">
-    <value>{0} {1} {2}</value>
+    <value>"{0}" "{1}" {2}</value>
   </data>
   <data name="ScaffoldXml" xml:space="preserve">
     <value>scaffold.xml</value>
@@ -614,10 +614,13 @@
   <data name="CertificatePrivateKeyAccessError" xml:space="preserve">
     <value>Your account does not have access to the private key for certificate {0}</value>
   </data>
-  <data name="PackageAzureServiceFinishedMessage" xml:space="preserve">
-    <value>Finished packaging application. Package saved to {0}</value>
+  <data name="ServiceSettings_ValidateStorageAccountName_InvalidName" xml:space="preserve">
+    <value>The storage account name '{0}' is invalid.  Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</value>
   </data>
-  <data name="PackageAzureServiceStartMessage" xml:space="preserve">
-    <value>Packaging Azure application to file {0} ...</value>
+  <data name="RemoveServiceWarning" xml:space="preserve">
+    <value>Are you sure you want to remove service \"{0}\"?</value>
+  </data>
+  <data name="ShouldProcessCaption" xml:space="preserve">
+    <value>Confirm</value>
   </data>
 </root>

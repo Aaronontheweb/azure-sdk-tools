@@ -4,6 +4,15 @@
     <Endpoints>
       <InputEndpoint name="HttpIn" protocol="tcp" port="$Port$" />
     </Endpoints>
+    <Startup>
+      <Task executionContext="elevated" commandLine="setup_worker.cmd">
+        <Environment>
+          <Variable name="EMULATED">
+            <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+          </Variable>
+        </Environment>
+      </Task>
+    </Startup>
     <Runtime>
       <Environment>
         <Variable name="PORT">

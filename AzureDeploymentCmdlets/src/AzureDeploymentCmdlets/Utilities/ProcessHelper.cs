@@ -32,6 +32,7 @@ namespace AzureDeploymentCmdlets.Utilities
         [PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
         internal static void StartAndWaitForProcess(ProcessStartInfo processInfo, out string standardOutput, out string standardError)
         {
+            processInfo.CreateNoWindow = true;
             processInfo.UseShellExecute = false;
             processInfo.RedirectStandardOutput = true;
             processInfo.RedirectStandardError = true;

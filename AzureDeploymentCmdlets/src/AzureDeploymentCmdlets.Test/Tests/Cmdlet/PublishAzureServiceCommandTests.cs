@@ -17,12 +17,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.ServiceModel;
 using AzureDeploymentCmdlets.Cmdlet;
+using AzureDeploymentCmdlets.Model;
 using AzureDeploymentCmdlets.Node.Cmdlet;
 using AzureDeploymentCmdlets.WAPPSCmdlet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AzureDeploymentCmdlets.Model;
-using System.ServiceModel;
+using System.Text.RegularExpressions;
 
 namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
 {
@@ -193,14 +194,17 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                 NewAzureServiceCommand newService = new NewAzureServiceCommand();
                 newService.NewAzureServiceProcess(files.RootPath, serviceName);
                 string servicePath = files.CreateDirectory(serviceName);
-
+                AzureService testService = new AzureService(Path.Combine(files.RootPath, serviceName), null);
+                testService.AddWebRole();
+                string cloudConfigFile = File.ReadAllText(testService.Paths.CloudConfiguration);
+                File.WriteAllText(testService.Paths.CloudConfiguration, new Regex("<Certificates\\s*/>").Replace(cloudConfigFile, ""));
                 // Get the publishing process started by creating the package
                 PublishAzureServiceCommand publishService = new PublishAzureServiceCommand(channel);
                 publishService.ShareChannel = true;
                 publishService.SkipUpload = true;
                 publishService.PublishService(servicePath);
                 AzureService service = new AzureService(Path.Combine(files.RootPath, serviceName), null);
-
+                
                 // Verify the publish service attempted to create and update
                 // the service through the mock.
                 Assert.IsTrue(createdHostedService);
@@ -473,6 +477,85 @@ namespace AzureDeploymentCmdlets.Test.Tests.Cmdlet
                 Assert.IsFalse(createdHostedService);
                 Assert.IsTrue(createdOrUpdatedDeployment);
                 Assert.AreEqual<string>(serviceName, service.ServiceName);
+            }
+        }
+
+        /// <summary>
+        /// Ensure that any iisnode logs are removed prior to packaging the
+        /// service.
+        ///</summary>
+        [TestMethod]
+        public void PublishAzureServiceRemovesNodeLogs()
+        {
+            // Create a temp directory that we'll use to "publish" our service
+            using (FileSystemHelper files = new FileSystemHelper(this) { EnableMonitoring = true })
+            {
+                // Import our default publish settings
+                files.CreateAzureSdkDirectoryAndImportPublishSettings();
+
+                // Create a new channel to mock the calls to Azure and
+                // determine all of the results that we'll need.
+                SimpleServiceManagement channel = new SimpleServiceManagement();
+
+                // Create a new service that we're going to publish
+                string serviceName = "TEST_SERVICE_NAME";
+                NewAzureServiceCommand newService = new NewAzureServiceCommand();
+                newService.NewAzureServiceProcess(files.RootPath, serviceName);
+                string servicePath = files.CreateDirectory(serviceName);
+
+                // Add a web role
+                AddAzureNodeWebRoleCommand newWebRole = new AddAzureNodeWebRoleCommand();
+                string webRoleName = "NODE_WEB_ROLE";
+                newWebRole.AddAzureNodeWebRoleProcess(webRoleName, 2, servicePath);
+                string webRolePath = Path.Combine(servicePath, webRoleName);
+
+                // Add a worker role
+                AddAzureNodeWorkerRoleCommand newWorkerRole = new AddAzureNodeWorkerRoleCommand();
+                string workerRoleName = "NODE_WORKER_ROLE";
+                newWorkerRole.AddAzureNodeWorkerRoleProcess(workerRoleName, 2, servicePath);
+                string workerRolePath = Path.Combine(servicePath, workerRoleName);
+
+                // Add second web and worker roles that we won't add log
+                // entries to
+                new AddAzureNodeWebRoleCommand()
+                    .AddAzureNodeWebRoleProcess("SECOND_WEB_ROLE", 2, servicePath);
+                new AddAzureNodeWorkerRoleCommand()
+                    .AddAzureNodeWorkerRoleProcess("SECOND_WORKER_ROLE", 2, servicePath);
+                
+                // Add fake logs directories for server.js
+                string logName = "server.js.logs";
+                string logPath = Path.Combine(webRolePath, logName);
+                Directory.CreateDirectory(logPath);
+                File.WriteAllText(Path.Combine(logPath, "0.txt"), "secret web role debug details were logged here");
+                logPath = Path.Combine(Path.Combine(workerRolePath, "NestedDirectory"), logName);
+                Directory.CreateDirectory(logPath);
+                File.WriteAllText(Path.Combine(logPath, "0.txt"), "secret worker role debug details were logged here");
+
+                // Get the publishing process started by creating the package
+                PublishAzureServiceCommand publishService = new PublishAzureServiceCommand(channel);
+                publishService.InitializeSettingsAndCreatePackage(servicePath);
+
+                // Rip open the package and make sure we can't find the log
+                string packagePath = Path.Combine(servicePath, "cloud_package.cspkg");
+                using (Package package = Package.Open(packagePath))
+                {
+                    // Make sure the web role and worker role packages don't
+                    // have any files with server.js.logs in the name
+                    Action<string> validateRole = roleName =>
+                        {
+                            PackagePart rolePart = package.GetParts().Where(p => p.Uri.ToString().Contains(roleName)).First();
+                            using (Package rolePackage = Package.Open(rolePart.GetStream()))
+                            {
+                                Assert.IsFalse(
+                                    rolePackage.GetParts().Any(p => p.Uri.ToString().Contains(logName)),
+                                    "Found {0} part in {1} package!",
+                                    logName,
+                                    roleName);
+                            }
+                        };
+                    validateRole(webRoleName);
+                    validateRole(workerRoleName);
+                }
             }
         }
     }

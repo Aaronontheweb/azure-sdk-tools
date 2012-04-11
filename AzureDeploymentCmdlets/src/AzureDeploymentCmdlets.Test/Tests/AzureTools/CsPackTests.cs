@@ -37,10 +37,16 @@ namespace AzureDeploymentCmdlets.Test.Tests.AzureTools
                 string standardOutput;
                 string standardError;
                 AzureService service = new AzureService(files.RootPath, serviceName, null);
-                service.AddWebRole();
+                RoleInfo webRoleInfo = service.AddWebRole();
+                string logsDir = Path.Combine(service.Paths.RootPath, webRoleInfo.Name, "server.js.logs");
+                string logFile = Path.Combine(logsDir, "0.txt");
+                string targetLogsFile = Path.Combine(service.Paths.LocalPackage, "roles", webRoleInfo.Name, @"approot\server.js.logs\0.txt");
+                files.CreateDirectory(logsDir);
+                files.CreateEmptyFile(logFile);
                 service.CreatePackage(DevEnv.Local, out standardOutput, out standardError);
 
                 AzureAssert.ScaffoldingExists(Path.Combine(service.Paths.LocalPackage, @"roles\WebRole1\approot"), Path.Combine(Resources.NodeScaffolding, Resources.WebRole));
+                Assert.IsTrue(File.Exists(targetLogsFile));
             }
         }
 
